@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<header>
+  <style>
+  h2 {
+    text-align: center
+  }
+  div {
+    display: block;
+    position: absolute;
+    width: 20%;
+    left:40%;
+    right:40%;
+    margin: auto;
+  }
+  select {
+    right: 0px;
+    position: absolute;
+  }
+  </style>
+</header>
+<html>
+
+<body>
+  <h2>Chirpy Reverie - Save Tool and Debug</h2>
+  <div id="service">null</div>
+  <script>
+  const levelnames = ["Sunset Shore", "Urban Thicket", "Chasm Cove", "Silver Wasteland", "???", "Spire Grounds", "Spire Tower"]
+  const exnames = ["Sunset Shore EX", "Urban Thicket EX", "Chasm Cove EX", "Silver Wasteland EX", "Void of the Forgotten EX", "Flawless Spire EX", "What"]
+  const template = `<p id="lev@" style="display:none">
+<label for="formlev@">#:</label>
+<select id="formlev@">
+  <option value="ex">S+</option>
+  <option value="5">S</option>
+  <option value="6">A</option>
+  <option value="7">B</option>
+  <option value="8" selected>C</option>
+</select>
+</p>
+<p id="ex@" style="display:none">
+<label for="formex@">%:</label>
+<select id="formex@">
+  <option value="0">S+</option>
+  <option value="1">S</option>
+  <option value="2">A</option>
+  <option value="3">B</option>
+  <option value="4" selected>N/A</option>
+</select>
+</p>`;
+  const header = `<p id="unlockedp">
+<label for="unlocked">Current Level:</label>
+<select id="unlocked">
+  <option value="8">Stasis Station</option>
+  <option value="7">Spire Tower</option>
+  <option value="6">Spire Grounds</option>
+  <option value="5">???</option>
+  <option value="4">Silver Wasteland</option>
+  <option value="3">Chasm Cove</option>
+  <option value="2">Urban Thicket</option>
+  <option value="1">Sunset Shore</option>
+</select>
+</p>`;
+  const footer = `</br><p>Your save code is: <button onclick='copyCode();'><b id = "saveCode"></b> (copy to clickboard)</button></p>`;
+  const service = document.getElementById("service");
+  service.innerHTML = header
+  for(let j = 0; j < 8; j++) {
+    var i = template.replaceAll("@", j)
+    i = i.replaceAll("#", levelnames[j])
+    i = i.replaceAll("%", exnames[j])
+    service.innerHTML = service.innerHTML + i
+  }
+  service.innerHTML += footer;
+  const savecodeelement = document.getElementById("saveCode");
+  const unlocked = document.getElementById("unlocked");
+
+  setInterval(function() {
+    for(let j = 0; j < 7; j++) {
+      i = document.getElementById("lev" + j)
+      if(j + 2 <= unlocked.value) {
+        i.style.display = "block"
+      } else {
+        i.style.display = "none"
+      }
+      i = document.getElementById("ex" + j)
+      if(document.getElementById("formlev" + j).value === "ex" && j + 2 <= unlocked.value) {
+        i.style.display = "block"
+      } else {
+        i.style.display = "none"
+      }
+    }
+    generateSaveCode();
+    savecodeelement.innerHTML = generateSaveCode()
+  }, 500);
+
+  function generateSaveCode() {
+    var saveCode = "";
+    var encrypt = "" + unlocked.value;
+    for(let j = 0; j < 8; j++) {
+      if(j < unlocked.value) {
+        i = document.getElementById("formlev" + j)
+        if(i.value == "ex") {
+          i = document.getElementById("formex" + j)
+        }
+        encrypt += i.value;
+      } else {
+        encrypt += 9;
+      }
+    }
+    encrypt = parseInt(1 + encrypt);
+    encrypt -= 37032963;
+    encrypt += "" + 11111;
+    encrypt = parseInt(encrypt)
+    while(!encrypt == 0) {
+      saveCode = ("p123456789abcwghmxyz").charAt((encrypt % 20)) + saveCode;
+      encrypt = Math.floor((encrypt - (encrypt % 20)) / 20);
+    }
+    return (saveCode);
+  }
+
+  async function copyCode() {
+    await navigator.clipboard.writeText(generateSaveCode())
+  }
+  </script>
+</body>
+
+</html>
